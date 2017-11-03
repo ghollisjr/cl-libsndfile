@@ -5,3 +5,9 @@
 
 (in-package :cl-libsndfile)
 
+(define-foreign-library libsndfile
+  (t (:default "libsndfile")))
+
+(use-foreign-library libsndfile)
+
+;; ADD CFFI-GROVEL INFO LATER
