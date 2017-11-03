@@ -1,0 +1,5 @@
+cl-libsndfile is in the public domain; use it for whatever.
+
+(NOTE: I believe this is fine due to libsndfile being LGPL, and since
+this library at most links to LGPL code, there should be no problems.
+I have too many scruples to be a lawyer.)
