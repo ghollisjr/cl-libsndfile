@@ -1,4 +1,4 @@
-cl-libsndfile is a common lisp binding for libsndfile, the legendary
+cl-libsndfile is a Common Lisp binding for libsndfile, the legendary
 library for opening audio files in a generally useful way without
 having to care so much about the file format details.
 
