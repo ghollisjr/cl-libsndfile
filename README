@@ -1,0 +1,8 @@
+cl-libsndfile is a common lisp binding for libsndfile, the legendary
+library for opening audio files in a generally useful way without
+having to care so much about the file format details.
+
+This project has two layers: Direct C interface using cffi, and a Lisp
+friendly interface where you can use lists, vectors, Lisp numerical
+types, etc. instead of worrying so much about specific data types.
+One's good for efficiency; the other's good for everything else.
