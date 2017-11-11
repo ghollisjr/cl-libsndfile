@@ -9,5 +9,4 @@
   :license "public domain"
   :depends-on (#:cffi)
   :components ((:file "package")
-               (:file "bindings")
-               (:file "wrapper")))
+               (:file "sndfile")))

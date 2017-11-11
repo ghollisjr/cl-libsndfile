@@ -6,3 +6,10 @@ This project has two layers: Direct C interface using cffi, and a Lisp
 friendly interface where you can use lists, vectors, Lisp numerical
 types, etc. instead of worrying so much about specific data types.
 One's good for efficiency; the other's good for everything else.
+
+======================================================================
+SWIG
+
+I used swig to generate the CFFI bindings like so:
+
+swig -cffi sndfile.i
