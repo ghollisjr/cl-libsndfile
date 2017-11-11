@@ -563,5 +563,3 @@
 (cffi:defcfun ("sf_get_chunk_data" sf_get_chunk_data) :int
   (it :pointer)
   (chunk_info :pointer))
-
-
