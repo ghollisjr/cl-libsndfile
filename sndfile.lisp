@@ -5,6 +5,10 @@
 
 ;;;; I've added some intro code here, and also some minor fixes to the
 ;;;; swig code below, marked with comments to explain.
+;;;;
+;;;; NOTE: The sf_count_t type was mistakenly considered a pointer by
+;;;; the library, so I need to manually inspect the functions and
+;;;; structs to repair this.
 (in-package :cl-libsndfile)
 
 (define-foreign-library libsndfile
@@ -65,6 +69,9 @@
 
 ;;;SWIG wrapper code ends here
 
+
+;; Adding explicit type that somehow got missed:
+(defctype sf_count_t :int64)
 
 (defanonenum 
 	(SF_FORMAT_WAV #.#x010000)
@@ -249,7 +256,7 @@
 (cl:defconstant SF_COUNT_MAX #x7FFFFFFFFFFFFFFF)
 
 (cffi:defcstruct SF_INFO
-	(frames :pointer)
+	(frames sf_count_t) ; sf_count_t pointer
 	(samplerate :int)
 	(channels :int)
 	(format :int)
@@ -274,17 +281,17 @@
 	(name :string))
 
 (cffi:defcstruct SF_EMBED_FILE_INFO
-	(offset :pointer)
-	(length :pointer))
+	(offset sf_count_t)
+	(length sf_count_t))
 
 (cffi:defcstruct SF_CUE_POINT
-	(indx :pointer)
-	(position :pointer)
-	(fcc_chunk :pointer)
-	(chunk_start :pointer)
-	(block_start :pointer)
-	(sample_offset :pointer)
-	(name :pointer :count 256))
+	(indx :int32)
+	(position :uint32)
+	(fcc_chunk :int32)
+	(chunk_start :int32)
+	(block_start :int32)
+	(sample_offset :uint32)
+	(name :char :count 256))
 
 (cffi:defcstruct SF_CUES
 	(cue_count :pointer)
