@@ -72,6 +72,8 @@
 
 ;; Adding explicit type that somehow got missed:
 (defctype sf_count_t :int64)
+;; Also setting size_t:
+(defctype size_t :long)
 
 (defanonenum 
 	(SF_FORMAT_WAV #.#x010000)
@@ -294,14 +296,21 @@
 	(name :char :count 256))
 
 (cffi:defcstruct SF_CUES
-	(cue_count :pointer)
-	(cue_points :pointer :count 100))
+	(:uint32 :pointer)
+	(cue_points (:struct SF_CUE_POINT)
+                    :count 100))
 
 (defanonenum 
 	(SF_LOOP_NONE #.800)
 	SF_LOOP_FORWARD
 	SF_LOOP_BACKWARD
 	SF_LOOP_ALTERNATING)
+
+(cffi:defcstruct SF_INSTRUMENT_loops
+  (mode :int)
+  (start :pointer)
+  (end :pointer)
+  (count :pointer))
 
 (cffi:defcstruct SF_INSTRUMENT
 	(gain :int)
@@ -312,13 +321,8 @@
 	(key_lo :char)
 	(key_hi :char)
 	(loop_count :int)
-	(loops :pointer :count 16))
-
-(cffi:defcstruct SF_INSTRUMENT_loops
-	(mode :int)
-	(start :pointer)
-	(end :pointer)
-	(count :pointer))
+	(loops (:struct SF_INSTRUMENT_loops)
+           :count 16))
 
 (cffi:defcstruct SF_LOOP_INFO
 	(time_sig_num :short)
@@ -327,48 +331,48 @@
 	(num_beats :int)
 	(bpm :float)
 	(root_key :int)
-	(future :pointer :count 6))
+	(future :int :count 6))
 
 (cffi:defcstruct SF_BROADCAST_INFO
-	(description :pointer :count 256)
-	(originator :pointer :count 32)
-	(originator_reference :pointer :count 32)
-	(origination_date :pointer :count 10)
-	(origination_time :pointer :count 8)
-	(time_reference_low :pointer)
-	(time_reference_high :pointer)
+	(description :char :count 256)
+	(originator :char :count 32)
+	(originator_reference :char :count 32)
+	(origination_date :char :count 10)
+	(origination_time :char :count 8)
+	(time_reference_low :uint32)
+	(time_reference_high :uint32)
 	(version :short)
-	(umid :pointer :count 64)
-	(reserved :pointer :count 190)
-	(coding_history_size :pointer)
-	(coding_history :pointer :count 256))
+	(umid :char :count 64)
+	(reserved :char :count 190)
+	(coding_history_size :uint32)
+	(coding_history :char :count 256))
 
 (cffi:defcstruct SF_CART_TIMER
-	(usage :pointer :count 4)
-	(value :pointer))
+	(usage :char :count 4)
+	(value :int32))
 
 (cffi:defcstruct SF_CART_INFO
-	(version :pointer :count 4)
-	(title :pointer :count 64)
-	(artist :pointer :count 64)
-	(cut_id :pointer :count 64)
-	(client_id :pointer :count 64)
-	(category :pointer :count 64)
-	(classification :pointer :count 64)
-	(out_cue :pointer :count 64)
-	(start_date :pointer :count 10)
-	(start_time :pointer :count 8)
-	(end_date :pointer :count 10)
-	(end_time :pointer :count 8)
-	(producer_app_id :pointer :count 64)
-	(producer_app_version :pointer :count 64)
-	(user_def :pointer :count 64)
-	(level_reference :pointer)
-	(post_timers :pointer :count 8)
-	(reserved :pointer :count 276)
-	(url :pointer :count 1024)
-	(tag_text_size :pointer)
-	(tag_text :pointer :count 256))
+	(version :char :count 4)
+	(title :char :count 64)
+	(artist :char :count 64)
+	(cut_id :char :count 64)
+	(client_id :char :count 64)
+	(category :char :count 64)
+	(classification :char :count 64)
+	(out_cue :char :count 64)
+	(start_date :char :count 10)
+	(start_time :char :count 8)
+	(end_date :char :count 10)
+	(end_time :char :count 8)
+	(producer_app_id :char :count 64)
+	(producer_app_version :char :count 64)
+	(user_def :char :count 64)
+	(level_reference :int32)
+	(post_timers (:struct SF_CART_TIMER) :count 8)
+	(reserved :char :count 276)
+	(url :char :count 1024)
+	(tag_text_size :uint32)
+	(tag_text :char :count 256))
 
 (cffi:defcstruct SF_VIRTUAL_IO
 	(get_filelen :pointer)
@@ -409,7 +413,7 @@
 (cffi:defcfun ("sf_error_str" sf_error_str) :int
   (sndfile :pointer)
   (str :string)
-  (len :pointer))
+  (len size_t))
 
 (cffi:defcfun ("sf_command" sf_command) :int
   (sndfile :pointer)
@@ -431,9 +435,9 @@
   (SF_SEEK_CUR 1)
   (SF_SEEK_END 2))
 
-(cffi:defcfun ("sf_seek" sf_seek) :pointer
+(cffi:defcfun ("sf_seek" sf_seek) sf_count_t
   (sndfile :pointer)
-  (frames :pointer)
+  (frames sf_count_t)
   (whence :int))
 
 (cffi:defcfun ("sf_set_string" sf_set_string) :int
@@ -450,95 +454,95 @@
 (cffi:defcfun ("sf_current_byterate" sf_current_byterate) :int
   (sndfile :pointer))
 
-(cffi:defcfun ("sf_read_raw" sf_read_raw) :pointer
+(cffi:defcfun ("sf_read_raw" sf_read_raw) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (bytes :pointer))
+  (bytes sf_count_t))
 
-(cffi:defcfun ("sf_write_raw" sf_write_raw) :pointer
+(cffi:defcfun ("sf_write_raw" sf_write_raw) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (bytes :pointer))
+  (bytes sf_count_t))
 
-(cffi:defcfun ("sf_readf_short" sf_readf_short) :pointer
+(cffi:defcfun ("sf_readf_short" sf_readf_short) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (frames :pointer))
+  (frames sf_count_t))
 
-(cffi:defcfun ("sf_writef_short" sf_writef_short) :pointer
+(cffi:defcfun ("sf_writef_short" sf_writef_short) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (frames :pointer))
+  (frames sf_count_t))
 
-(cffi:defcfun ("sf_readf_int" sf_readf_int) :pointer
+(cffi:defcfun ("sf_readf_int" sf_readf_int) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (frames :pointer))
+  (frames sf_count_t))
 
-(cffi:defcfun ("sf_writef_int" sf_writef_int) :pointer
+(cffi:defcfun ("sf_writef_int" sf_writef_int) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (frames :pointer))
+  (frames sf_count_t))
 
-(cffi:defcfun ("sf_readf_float" sf_readf_float) :pointer
+(cffi:defcfun ("sf_readf_float" sf_readf_float) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (frames :pointer))
+  (frames sf_count_t))
 
-(cffi:defcfun ("sf_writef_float" sf_writef_float) :pointer
+(cffi:defcfun ("sf_writef_float" sf_writef_float) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (frames :pointer))
+  (frames sf_count_t))
 
-(cffi:defcfun ("sf_readf_double" sf_readf_double) :pointer
+(cffi:defcfun ("sf_readf_double" sf_readf_double) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (frames :pointer))
+  (frames sf_count_t))
 
-(cffi:defcfun ("sf_writef_double" sf_writef_double) :pointer
+(cffi:defcfun ("sf_writef_double" sf_writef_double) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (frames :pointer))
+  (frames sf_count_t))
 
-(cffi:defcfun ("sf_read_short" sf_read_short) :pointer
+(cffi:defcfun ("sf_read_short" sf_read_short) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (items :pointer))
+  (items sf_count_t))
 
-(cffi:defcfun ("sf_write_short" sf_write_short) :pointer
+(cffi:defcfun ("sf_write_short" sf_write_short) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (items :pointer))
+  (items sf_count_t))
 
-(cffi:defcfun ("sf_read_int" sf_read_int) :pointer
+(cffi:defcfun ("sf_read_int" sf_read_int) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (items :pointer))
+  (items sf_count_t))
 
-(cffi:defcfun ("sf_write_int" sf_write_int) :pointer
+(cffi:defcfun ("sf_write_int" sf_write_int) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (items :pointer))
+  (items sf_count_t))
 
-(cffi:defcfun ("sf_read_float" sf_read_float) :pointer
+(cffi:defcfun ("sf_read_float" sf_read_float) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (items :pointer))
+  (items sf_count_t))
 
-(cffi:defcfun ("sf_write_float" sf_write_float) :pointer
+(cffi:defcfun ("sf_write_float" sf_write_float) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (items :pointer))
+  (items sf_count_t))
 
-(cffi:defcfun ("sf_read_double" sf_read_double) :pointer
+(cffi:defcfun ("sf_read_double" sf_read_double) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (items :pointer))
+  (items sf_count_t))
 
-(cffi:defcfun ("sf_write_double" sf_write_double) :pointer
+(cffi:defcfun ("sf_write_double" sf_write_double) sf_count_t
   (sndfile :pointer)
   (ptr :pointer)
-  (items :pointer))
+  (items sf_count_t))
 
 (cffi:defcfun ("sf_close" sf_close) :int
   (sndfile :pointer))
@@ -547,7 +551,7 @@
   (sndfile :pointer))
 
 (cffi:defcstruct SF_CHUNK_INFO
-	(id :pointer :count 64)
+	(id :char :count 64)
 	(id_size :unsigned-int)
 	(datalen :unsigned-int)
 	(data :pointer))

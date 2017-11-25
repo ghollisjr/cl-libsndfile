@@ -254,4 +254,5 @@
    :sf_get_chunk_iterator
    :sf_next_chunk_iterator
    :sf_get_chunk_size
-   :sf_get_chunk_data))
+   :sf_get_chunk_data
+   ))
