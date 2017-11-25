@@ -1,4 +1,4 @@
-;;;; cl-libsndfile is a Common Lisp data analysis library.
+;;;; cl-libsndfile is a Common Lisp wrapper for libsndfile.
 ;;;; Copyright 2017 Gary Hollis
 ;;;;
 ;;;; cl-libsndfile is in the public domain; use it for whatever.
